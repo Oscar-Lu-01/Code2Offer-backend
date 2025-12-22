@@ -10,7 +10,6 @@ import edu.hhu.Code2Offer.constant.UserConstant;
 import edu.hhu.Code2Offer.exception.BusinessException;
 import edu.hhu.Code2Offer.exception.ThrowUtils;
 import edu.hhu.Code2Offer.model.dto.questionBankQuestion.QuestionBankQuestionAddRequest;
-import edu.hhu.Code2Offer.model.dto.questionBankQuestion.QuestionBankQuestionEditRequest;
 import edu.hhu.Code2Offer.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
 import edu.hhu.Code2Offer.model.dto.questionBankQuestion.QuestionBankQuestionUpdateRequest;
 import edu.hhu.Code2Offer.model.entity.QuestionBankQuestion;

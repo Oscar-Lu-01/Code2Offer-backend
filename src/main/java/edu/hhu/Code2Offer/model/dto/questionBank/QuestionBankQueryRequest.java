@@ -31,22 +31,20 @@ public class QuestionBankQueryRequest extends PageRequest implements Serializabl
      * 搜索词
      */
     private String searchText;
-
     /**
      * 标题
      */
     private String title;
 
     /**
-     * 内容
+     * 描述
      */
-    private String content;
+    private String description;
 
     /**
-     * 标签列表
+     * 图片
      */
-    private List<String> tags;
-
+    private String picture;
     /**
      * 创建用户 id
      */

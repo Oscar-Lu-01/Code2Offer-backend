@@ -1,6 +1,8 @@
 package edu.hhu.Code2Offer.model.vo;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import edu.hhu.Code2Offer.model.entity.QuestionBankQuestion;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
@@ -11,27 +13,24 @@ import java.util.List;
 
 /**
  * 题库题目关联视图
- *
-*
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @Data
 public class QuestionBankQuestionVO implements Serializable {
-
     /**
      * id
      */
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
-     * 标题
+     * 题库 id
      */
-    private String title;
+    private Long questionBankId;
 
     /**
-     * 内容
+     * 题目 id
      */
-    private String content;
+    private Long questionId;
 
     /**
      * 创建用户 id
@@ -49,16 +48,6 @@ public class QuestionBankQuestionVO implements Serializable {
     private Date updateTime;
 
     /**
-     * 标签列表
-     */
-    private List<String> tagList;
-
-    /**
-     * 创建用户信息
-     */
-    private UserVO user;
-
-    /**
      * 封装类转对象
      *
      * @param questionBankQuestionVO
@@ -70,8 +59,6 @@ public class QuestionBankQuestionVO implements Serializable {
         }
         QuestionBankQuestion questionBankQuestion = new QuestionBankQuestion();
         BeanUtils.copyProperties(questionBankQuestionVO, questionBankQuestion);
-        List<String> tagList = questionBankQuestionVO.getTagList();
-        questionBankQuestion.setTags(JSONUtil.toJsonStr(tagList));
         return questionBankQuestion;
     }
 
