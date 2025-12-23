@@ -73,6 +73,11 @@ public class User implements Serializable {
     private Date updateTime;
 
     /**
+     * 更新时间
+     */
+    private Date editTime;
+
+    /**
      * 是否删除
      */
     @TableLogic

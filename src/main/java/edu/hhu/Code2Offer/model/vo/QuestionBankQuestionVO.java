@@ -47,6 +47,12 @@ public class QuestionBankQuestionVO implements Serializable {
      */
     private Date updateTime;
 
+
+    /**
+     * 创建用户信息
+     */
+    private UserVO user;
+
     /**
      * 封装类转对象
      *
@@ -74,7 +80,7 @@ public class QuestionBankQuestionVO implements Serializable {
         }
         QuestionBankQuestionVO questionBankQuestionVO = new QuestionBankQuestionVO();
         BeanUtils.copyProperties(questionBankQuestion, questionBankQuestionVO);
-        questionBankQuestionVO.setTagList(JSONUtil.toList(questionBankQuestion.getTags(), String.class));
         return questionBankQuestionVO;
     }
+
 }

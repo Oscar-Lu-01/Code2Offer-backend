@@ -1,5 +1,6 @@
 package edu.hhu.Code2Offer.controller;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.hhu.Code2Offer.annotation.AuthCheck;
 import edu.hhu.Code2Offer.common.BaseResponse;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 题库接口
@@ -218,6 +220,7 @@ public class QuestionBankController {
         // todo 在此处将实体类和 DTO 进行转换
         QuestionBank questionBank = new QuestionBank();
         BeanUtils.copyProperties(questionBankEditRequest, questionBank);
+
         // 数据校验
         questionBankService.validQuestionBank(questionBank, false);
         User loginUser = userService.getLoginUser(request);

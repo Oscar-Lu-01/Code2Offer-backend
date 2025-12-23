@@ -1,5 +1,6 @@
 package edu.hhu.Code2Offer.controller;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.hhu.Code2Offer.annotation.AuthCheck;
 import edu.hhu.Code2Offer.common.BaseResponse;
@@ -18,18 +19,17 @@ import edu.hhu.Code2Offer.model.entity.User;
 import edu.hhu.Code2Offer.model.vo.QuestionVO;
 import edu.hhu.Code2Offer.service.QuestionService;
 import edu.hhu.Code2Offer.service.UserService;
+import io.github.classgraph.json.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 题目接口
- *
-*
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @RestController
 @RequestMapping("/question")
@@ -218,6 +218,12 @@ public class QuestionController {
         // todo 在此处将实体类和 DTO 进行转换
         Question question = new Question();
         BeanUtils.copyProperties(questionEditRequest, question);
+        List<String> tags = questionEditRequest.getTags();
+        if(tags!=null){
+            question.setTags(JSONUtil.toJsonStr(tags));
+        }
+
+
         // 数据校验
         questionService.validQuestion(question, false);
         User loginUser = userService.getLoginUser(request);
