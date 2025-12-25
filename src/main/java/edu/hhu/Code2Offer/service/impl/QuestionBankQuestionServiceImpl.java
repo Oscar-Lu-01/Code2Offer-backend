@@ -6,19 +6,25 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.hhu.Code2Offer.common.ErrorCode;
 import edu.hhu.Code2Offer.constant.CommonConstant;
+import edu.hhu.Code2Offer.exception.BusinessException;
 import edu.hhu.Code2Offer.exception.ThrowUtils;
 import edu.hhu.Code2Offer.mapper.QuestionBankQuestionMapper;
 import edu.hhu.Code2Offer.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
+import edu.hhu.Code2Offer.model.entity.Question;
+import edu.hhu.Code2Offer.model.entity.QuestionBank;
 import edu.hhu.Code2Offer.model.entity.QuestionBankQuestion;
 import edu.hhu.Code2Offer.model.entity.User;
 import edu.hhu.Code2Offer.model.vo.QuestionBankQuestionVO;
 import edu.hhu.Code2Offer.model.vo.UserVO;
 import edu.hhu.Code2Offer.service.QuestionBankQuestionService;
+import edu.hhu.Code2Offer.service.QuestionBankService;
+import edu.hhu.Code2Offer.service.QuestionService;
 import edu.hhu.Code2Offer.service.UserService;
 import edu.hhu.Code2Offer.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -41,6 +47,10 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
 
     @Resource
     private UserService userService;
+    @Autowired
+    private QuestionService questionService;
+    @Autowired
+    private QuestionBankService questionBankService;
 
     /**
      * 校验数据
@@ -52,6 +62,18 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
     public void validQuestionBankQuestion(QuestionBankQuestion questionBankQuestion, boolean add) {
         //不需要校验
         ThrowUtils.throwIf(questionBankQuestion == null, ErrorCode.PARAMS_ERROR);
+        Long questionId = questionBankQuestion.getQuestionId();
+        Long questionBankId = questionBankQuestion.getQuestionBankId();
+
+        if(questionId != null){
+            Question question = questionService.getById(questionId);
+            ThrowUtils.throwIf(question==null,ErrorCode.NOT_FOUND_ERROR,"题目不存在");
+        }
+        if(questionBankId != null){
+            QuestionBank questionBank = questionBankService.getById(questionBankId);
+            ThrowUtils.throwIf(questionBank==null,ErrorCode.NOT_FOUND_ERROR,"题库不存在");
+        }
+
 //        // todo 从对象中取值
 //        String title = questionBankQuestion.getTitle();
 //        // 创建数据时，参数不能为空

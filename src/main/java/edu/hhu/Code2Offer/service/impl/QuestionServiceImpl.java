@@ -1,10 +1,14 @@
 package edu.hhu.Code2Offer.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import edu.hhu.Code2Offer.common.BaseResponse;
 import edu.hhu.Code2Offer.common.ErrorCode;
+import edu.hhu.Code2Offer.common.ResultUtils;
 import edu.hhu.Code2Offer.constant.CommonConstant;
 import edu.hhu.Code2Offer.exception.ThrowUtils;
 import edu.hhu.Code2Offer.mapper.QuestionMapper;
@@ -12,9 +16,11 @@ import edu.hhu.Code2Offer.model.dto.question.QuestionQueryRequest;
 import edu.hhu.Code2Offer.model.entity.Question;
 //import edu.hhu.Code2Offer.model.entity.QuestionFavour;
 //import edu.hhu.Code2Offer.model.entity.QuestionThumb;
+import edu.hhu.Code2Offer.model.entity.QuestionBankQuestion;
 import edu.hhu.Code2Offer.model.entity.User;
 import edu.hhu.Code2Offer.model.vo.QuestionVO;
 import edu.hhu.Code2Offer.model.vo.UserVO;
+import edu.hhu.Code2Offer.service.QuestionBankQuestionService;
 import edu.hhu.Code2Offer.service.QuestionService;
 import edu.hhu.Code2Offer.service.UserService;
 import edu.hhu.Code2Offer.utils.SqlUtils;
@@ -41,6 +47,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     @Resource
     private UserService userService;
 
+    @Resource
+    private QuestionBankQuestionService questionBankQuestionService;
+
     /**
      * 校验数据
      *
@@ -53,18 +62,24 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         // todo 从对象中取值
         String title = question.getTitle();
         String Content = question.getContent();
+        String answer = question.getAnswer();
         // 创建数据时，参数不能为空
         if (add) {
             // todo 补充校验规则
             ThrowUtils.throwIf(StringUtils.isBlank(title), ErrorCode.PARAMS_ERROR);
+            ThrowUtils.throwIf(StringUtils.isBlank(Content), ErrorCode.PARAMS_ERROR);
+            ThrowUtils.throwIf(StringUtils.isBlank(answer), ErrorCode.PARAMS_ERROR);
         }
         // 修改数据时，有参数则校验
         // todo 补充校验规则
         if (StringUtils.isNotBlank(title)) {
             ThrowUtils.throwIf(title.length() > 80, ErrorCode.PARAMS_ERROR, "标题过长");
         }
-        if (StringUtils.isNotBlank(title)) {
-            ThrowUtils.throwIf(title.length() > 10240, ErrorCode.PARAMS_ERROR, "内容过长");
+        if (StringUtils.isNotBlank(Content)) {
+            ThrowUtils.throwIf(Content.length() > 32768, ErrorCode.PARAMS_ERROR, "内容过长");
+        }
+        if (StringUtils.isNotBlank(answer)) {
+            ThrowUtils.throwIf(answer.length() > 65535, ErrorCode.PARAMS_ERROR, "答案过长");
         }
     }
 
@@ -91,6 +106,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         List<String> tagList = questionQueryRequest.getTags();
         Long userId = questionQueryRequest.getUserId();
         String answer = questionQueryRequest.getAnswer();
+
         // todo 补充需要的查询条件
         // 从多字段中搜索
         if (StringUtils.isNotBlank(searchText)) {
@@ -222,6 +238,38 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         questionVOPage.setRecords(questionVOList);
         return questionVOPage;
+    }
+
+
+    /**
+     * 分页获取题目列表（仅管理员可用）
+     *
+     * @param questionQueryRequest
+     * @return
+     */
+    public Page<Question> listQuestionByPage(QuestionQueryRequest questionQueryRequest) {
+        long current = questionQueryRequest.getCurrent();
+        long size = questionQueryRequest.getPageSize();
+        QueryWrapper<Question> queryWrapper = this.getQueryWrapper(questionQueryRequest);
+        //根据题库查询题目列表接口
+        Long questionBankId = questionQueryRequest.getQuestionBankId();
+        System.out.println("questionBankId:" + questionBankId);
+        if (questionBankId != null) {
+            System.out.println("questionBankId is here");
+            //查询是否是题库内的题目id，使用.eq优化性能
+            LambdaQueryWrapper<QuestionBankQuestion> lambdaQueryWrapper = Wrappers.lambdaQuery(QuestionBankQuestion.class)
+                    .select(QuestionBankQuestion::getQuestionId)
+                    .eq(QuestionBankQuestion::getQuestionBankId, questionBankId);
+            List<QuestionBankQuestion> questionList = questionBankQuestionService.list(lambdaQueryWrapper);
+            if (CollUtil.isNotEmpty(questionList)) {
+                //取出题目id集合
+                List<Long> questionIdSet = questionList.stream().map(QuestionBankQuestion::getQuestionId)
+                        .collect(Collectors.toList());
+                queryWrapper.in("id", questionIdSet);
+            }
+        }
+        // 查询数据库
+        return this.page(new Page<>(current, size), queryWrapper);
     }
 
 }

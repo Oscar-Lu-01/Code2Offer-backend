@@ -9,9 +9,6 @@ import java.util.List;
 
 /**
  * 查询题库题目关联请求
- *
-*
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

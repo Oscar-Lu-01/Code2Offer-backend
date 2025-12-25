@@ -1,13 +1,24 @@
 package edu.hhu.Code2Offer.service;
 
+import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import edu.hhu.Code2Offer.annotation.AuthCheck;
+import edu.hhu.Code2Offer.common.BaseResponse;
+import edu.hhu.Code2Offer.common.ResultUtils;
+import edu.hhu.Code2Offer.constant.UserConstant;
 import edu.hhu.Code2Offer.model.dto.question.QuestionQueryRequest;
 import edu.hhu.Code2Offer.model.entity.Question;
+import edu.hhu.Code2Offer.model.entity.QuestionBankQuestion;
 import edu.hhu.Code2Offer.model.vo.QuestionVO;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 题目服务
@@ -50,4 +61,12 @@ public interface QuestionService extends IService<Question> {
      * @return
      */
     Page<QuestionVO> getQuestionVOPage(Page<Question> questionPage, HttpServletRequest request);
+
+    /**
+     * 分页获取题目列表（仅管理员可用）
+     *
+     * @param questionQueryRequest
+     * @return
+     */
+    Page<Question> listQuestionByPage(QuestionQueryRequest questionQueryRequest);
 }

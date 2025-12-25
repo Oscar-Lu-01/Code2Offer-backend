@@ -1,5 +1,6 @@
 package edu.hhu.Code2Offer.controller;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.hhu.Code2Offer.annotation.AuthCheck;
 import edu.hhu.Code2Offer.common.BaseResponse;
@@ -12,6 +13,7 @@ import edu.hhu.Code2Offer.exception.ThrowUtils;
 import edu.hhu.Code2Offer.model.dto.questionBankQuestion.QuestionBankQuestionAddRequest;
 import edu.hhu.Code2Offer.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
 import edu.hhu.Code2Offer.model.dto.questionBankQuestion.QuestionBankQuestionUpdateRequest;
+import edu.hhu.Code2Offer.model.dto.questionBankQuestion.QuestionBankQuestionRemoveRequest;
 import edu.hhu.Code2Offer.model.entity.QuestionBankQuestion;
 import edu.hhu.Code2Offer.model.entity.User;
 import edu.hhu.Code2Offer.model.vo.QuestionBankQuestionVO;
@@ -26,9 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * 题库题目关联接口
- *
-*
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @RestController
 @RequestMapping("/questionBankQuestion")
@@ -58,6 +57,9 @@ public class QuestionBankQuestionController {
         BeanUtils.copyProperties(questionBankQuestionAddRequest, questionBankQuestion);
         // 数据校验
         questionBankQuestionService.validQuestionBankQuestion(questionBankQuestion, true);
+        //特殊校验：题目和题库必须存在，写到service里
+
+
         // todo 填充默认值
         User loginUser = userService.getLoginUser(request);
         questionBankQuestion.setUserId(loginUser.getId());
@@ -203,5 +205,23 @@ public class QuestionBankQuestionController {
     }
 
 
+    /**
+     * 移除题库题目关联
+     *
+     * @param questionBankQuestionRemoveRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/remove")
+    public BaseResponse<Boolean> removeQuestionBankQuestion(@RequestBody QuestionBankQuestionRemoveRequest questionBankQuestionRemoveRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(questionBankQuestionRemoveRequest == null, ErrorCode.PARAMS_ERROR);
+        Long questionBankId = questionBankQuestionRemoveRequest.getQuestionBankId();
+        Long questionId = questionBankQuestionRemoveRequest.getQuestionId();
+        Wrappers.lambdaQuery(QuestionBankQuestion.class)
+                .eq(QuestionBankQuestion::getQuestionBankId, questionBankId)
+                .eq(QuestionBankQuestion::getQuestionId, questionId);
+        boolean result = questionBankQuestionService.removeById(questionBankId);
+        return ResultUtils.success(result);
+    }
     // endregion
 }

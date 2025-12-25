@@ -9,9 +9,6 @@ import java.util.List;
 
 /**
  * 查询题目请求
- *
-*
- * @from <a href="https://www.code-nav.cn">编程导航学习圈</a>
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -56,6 +53,12 @@ public class QuestionQueryRequest extends PageRequest implements Serializable {
      * 推荐答案
      */
     private String answer;
+
+
+    /**
+     * 补充题库id
+     */
+    private Long questionBankId;
 
     private static final long serialVersionUID = 1L;
 }

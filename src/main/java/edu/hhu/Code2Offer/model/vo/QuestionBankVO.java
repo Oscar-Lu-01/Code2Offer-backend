@@ -1,13 +1,13 @@
 package edu.hhu.Code2Offer.model.vo;
 
-import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import edu.hhu.Code2Offer.model.entity.Question;
 import edu.hhu.Code2Offer.model.entity.QuestionBank;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 题库视图
@@ -56,6 +56,13 @@ public class QuestionBankVO implements Serializable {
      * 创建用户信息
      */
     private UserVO user;
+
+
+    /**
+     * 题库里的题目分页
+     */
+    Page<Question> questionPage;
+
 
     /**
      * 封装类转对象
