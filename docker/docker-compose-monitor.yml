@@ -1,0 +1,36 @@
+version: '3.8'
+
+networks:
+  code2offer-net:
+    external: true  # 引用 infra 层预先创建好的网络
+
+services:
+  # ----------------------------------------------------------------
+  # 1. Kibana (ES 可视化控制台)
+  # ----------------------------------------------------------------
+  kibana:
+    image: kibana:7.17.21
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - I18N_LOCALE=zh-CN
+    ports:
+      - "5601:5601"
+    networks:
+      - code2offer-net
+    # ⚠️ 这里的 depends_on 在跨文件部署时只起提示作用，不会强制阻塞启动
+    restart: always
+
+  # ----------------------------------------------------------------
+  # 2. Sentinel (流量治理控制台)
+  # ----------------------------------------------------------------
+  sentinel:
+    image: bladex/sentinel-dashboard:1.8.6
+    container_name: sentinel-dashboard
+    environment:
+      - JAVA_OPTS=-Dserver.port=8858 -Dcsp.sentinel.dashboard.server=localhost:8858
+    ports:
+      - "8858:8858"
+    networks:
+      - code2offer-net
+    restart: always

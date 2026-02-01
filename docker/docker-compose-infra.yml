@@ -1,0 +1,89 @@
+version: '3.8'
+
+networks:
+  code2offer-net:
+    name: code2offer-net  # 显式命名，方便外部引用
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  es_data:
+  nacos_data:
+  etcd_data:
+
+services:
+  mysql:
+    image: mysql:8.0.32
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=Code2Offer
+      - TZ=Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - code2offer-net
+    restart: always
+
+  redis:
+    image: redis:6.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - code2offer-net
+    restart: always
+
+  nacos:
+    image: nacos/nacos-server:v2.2.3
+    container_name: nacos-standalone
+    environment:
+      - MODE=standalone
+      - JVM_XMS=256m
+      - JVM_XMX=256m
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - nacos_data:/home/nacos/data
+    networks:
+      - code2offer-net
+    restart: always
+
+  elasticsearch:
+    build:
+      context: ./Dockerfiles
+      dockerfile: Dockerfile-Elasticsearch
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - code2offer-net
+    restart: always
+
+  etcd:
+    image: bitnami/etcd:3.5
+    container_name: etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    ports:
+      - "2379:2379"
+    volumes:
+      - etcd_data:/bitnami/etcd-data
+    networks:
+      - code2offer-net
+    restart: always

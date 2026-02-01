@@ -1,8 +1,9 @@
-# 公共配置文件
+# ==========================================
+# 核心 Spring 配置 (合并了原本的 bootstrap 内容)
+# ==========================================
 spring:
   application:
     name: Code2Offer
-  # 默认 dev 环境
   profiles:
     active: dev
 
@@ -10,23 +11,31 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
   # session 配置
   session:
     # todo 取消注释开启分布式 session（须先配置 Redis）
     # store-type: redis
     # 30 天过期
     timeout: 2592000
+    # cookie 30 天过期
+    servlet:
+      cookie:
+        max-age: 2592000
+
   # 数据库配置
   # todo 需替换配置
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://106.13.184.117:13306/Code2Offer
-#    username: root
-#    password: 123456
-  # 数据源配置
+  #  datasource:
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
+  #    url: jdbc:mysql://106.13.184.117:13306/Code2Offer
+  #    username: root
+  #    password: 123456
+
+  # 数据源配置 (正式生效部分)
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://106.13.184.117:13306/Code2Offer
+    # 注意：确保端口和 Docker 映射一致，之前看你是 3306
+    url: jdbc:mysql://106.13.184.117:3306/Code2Offer
     username: root
     password: 123456
     # 指定数据源类型
@@ -98,35 +107,58 @@ spring:
         allow: 127.0.0.1 # 允许访问的地址，如果allow没有配置或者为空，则允许所有访问
         deny: # 拒绝访问的地址，deny优先于allow，如果在deny列表中，就算在allow列表中，也会被拒绝
 
-
   # Redis 配置
   # todo 需替换配置，然后取消注释
   redis:
     database: 0
     host: 106.13.184.117
-    port: 16379
+    port: 6379
     timeout: 5000
-#    password: 123456
+    # password: 123456
+
   # Elasticsearch 配置
   # todo 需替换配置，然后取消注释
   elasticsearch:
-    uris: http://localhost:9200
-#    username: root
-#    password: 123456
-  # 文件上传
+    uris: http://106.13.184.117:9200
+    # username: root
+    # password: 123456
+
+  # 文件上传配置
   servlet:
     multipart:
       # 大小限制
       max-file-size: 10MB
+
+# ==========================================
+# Nacos 配置中心 (必须顶格写，与 spring 平级)
+# ==========================================
+nacos:
+  config:
+    server-addr: 106.13.184.117:8848  # nacos 地址
+    data-id: Code2Offer.yaml # 控制台填写的 Data ID
+    group: DEFAULT_GROUP # 控制台填写的 group
+    type: yaml  # 选择的文件格式
+    auto-refresh: true # 开启自动刷新
+    bootstrap:
+      enable: true  # 预加载
+    failure-tolerance-enabled: true # 如果连不上 Nacos，不要报错，跳过去
+  # 如果注册中心连不上，也不要报错，继续启动
+  discovery:
+    enabled: true
+    failure-tolerance-enabled: true
+    # 如果 Nacos 服务端开启了鉴权（2.x 常见），需要加：
+    # username: nacos
+    # password: nacos
+
+# ==========================================
+# 其他服务配置
+# ==========================================
 server:
   address: 0.0.0.0
   port: 8101
   servlet:
     context-path: /api
-    # cookie 30 天过期
-    session:
-      cookie:
-        max-age: 2592000
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -136,6 +168,7 @@ mybatis-plus:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名
       logic-delete-value: 1 # 逻辑已删除值（默认为 1）
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
+
 # 微信相关
 wx:
   # 微信公众平台
@@ -157,6 +190,7 @@ wx:
   open:
     appId: xxx
     appSecret: xxx
+
 # 对象存储
 # todo 需替换配置
 cos:
@@ -165,6 +199,7 @@ cos:
     secretKey: xxx
     region: xxx
     bucket: xxx
+
 # 接口文档配置
 knife4j:
   enable: true
@@ -176,20 +211,10 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - edu.hhu.Code2Offer.controller
+
 # 热 key 探测
 hotkey:
   app-name: Code2Offer
   caffeine-size: 10000
   push-period: 1000
-  etcd-server: http://localhost:2379
-
-# 配置中心
-nacos:
-  config:
-    server-addr: 127.0.0.1:8848  # nacos 地址
-    bootstrap:
-      enable: true  # 预加载
-      data-id: Code2Offer # 控制台填写的 Data ID
-    group: DEFAULT_GROUP # 控制台填写的 group
-    type: yaml  # 选择的文件格式
-    auto-refresh: true # 开启自动刷新
+  etcd-server: http://106.13.184.117:2379

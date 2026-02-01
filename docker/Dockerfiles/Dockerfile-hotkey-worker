@@ -1,0 +1,8 @@
+# 1. 指定基础镜像
+FROM openjdk:8-jre-slim
+
+# 2. 这里的路径必须相对于 context (即 docker 目录)
+COPY jar/worker-0.0.4-SNAPSHOT.jar /app.jar
+
+# 3. 启动命令
+ENTRYPOINT ["java", "-jar", "/app.jar"]

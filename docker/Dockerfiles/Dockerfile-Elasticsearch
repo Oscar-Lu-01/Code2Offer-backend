@@ -1,0 +1,6 @@
+# 1. 指定基础镜像，必须和你原本使用的版本一致
+FROM elasticsearch:7.17.21
+
+# 2. 运行命令安装插件
+#加了 --batch 参数，自动选'y'
+RUN ./bin/elasticsearch-plugin install --batch https://release.infinilabs.com/analysis-ik/stable/elasticsearch-analysis-ik-7.17.21.zip
