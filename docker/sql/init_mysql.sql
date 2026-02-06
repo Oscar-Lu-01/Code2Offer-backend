@@ -1,5 +1,5 @@
 -- 创建库
-create database if not exists;
+CREATE DATABASE IF NOT EXISTS Code2Offer;
 
 USE Code2Offer;
 

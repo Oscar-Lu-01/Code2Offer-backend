@@ -123,6 +123,28 @@ spring:
     # username: root
     # password: 123456
 
+
+  # ==========================================
+  # Sentinel 流量治理与熔断降级
+  # ==========================================
+  cloud:
+    sentinel:
+      transport:
+        # Sentinel 控制台地址
+        dashboard: 106.13.184.117:8858
+        # 客户端监控 API 端口（默认 8719，若被占用会自动 +1 查找）
+        port: 8719
+      # 规则持久化到 Nacos
+      datasource:
+        # 降级规则（对应你之前在 Nacos 创建的 DataID）
+        degrade:
+          nacos:
+            server-addr: 106.13.184.117:8848
+            data-id: code2offer-sentinel-degrade
+            group-id: SENTINEL_GROUP
+            rule-type: degrade
+            data-type: json
+
   # 文件上传配置
   servlet:
     multipart:

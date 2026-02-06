@@ -1,6 +1,7 @@
 package edu.hhu.Code2Offer.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -296,6 +297,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
      * @return
      */
     @Override
+    @SentinelResource(value = "es_search_questions", fallback = "searchFromEsFallback")
     public Page<Question> searchFromEs(QuestionQueryRequest questionQueryRequest) {
         // 获取参数
         Long id = questionQueryRequest.getId();
@@ -370,6 +372,30 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         return page;
     }
 
+    /**
+     * ES 降级兜底方案
+     */
+    public Page<Question> searchFromEsFallback(QuestionQueryRequest questionQueryRequest, Throwable ex) {
+        log.error("ES 搜索服务异常，已触发 Sentinel 熔断降级！原因: {}", ex.getMessage());
+
+        // 构造分页对象
+        long current = questionQueryRequest.getCurrent();
+        long size = questionQueryRequest.getPageSize();
+        Page<Question> fallbackPage = new Page<>(current, size);
+
+        // 策略 A: 尝试从数据库进行模糊搜索兜底
+        String searchText = questionQueryRequest.getSearchText();
+        LambdaQueryWrapper<Question> queryWrapper = Wrappers.lambdaQuery();
+
+        if (StringUtils.isNotBlank(searchText)) {
+            queryWrapper.and(qw -> qw.like(Question::getTitle, searchText)
+                    .or()
+                    .like(Question::getContent, searchText));
+        }
+
+        // 限制数量，防止数据库在高负载下被 Like 扫表带走
+        return this.page(fallbackPage, queryWrapper);
+    }
 
     /**
      * 批量删除题目

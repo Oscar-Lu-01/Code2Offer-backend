@@ -70,6 +70,7 @@ public interface QuestionService extends IService<Question> {
      */
     Page<Question> listQuestionByPage(QuestionQueryRequest questionQueryRequest);
 
+
     /**
      * 从 ES 查询题目
      *
